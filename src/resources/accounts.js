@@ -48,6 +48,15 @@ export function buildAccounts(ctx) {
     delete: (id) => ctx.delete(`/api/v1/accounts/${encodeURIComponent(id)}`).then(unwrap),
 
     /**
+     * Seed the org's system group accounts ('ASSETS', 'CASH', 'PAYABLES', …).
+     *
+     * A fresh org has none, and every account hangs beneath them, so call this
+     * before creating the first account. Idempotent: creates only missing keys
+     * and returns `{ created, existing }`, so it's safe before every import run.
+     */
+    seed: () => ctx.post('/api/v1/accounts/seed', {}).then(unwrap),
+
+    /**
      * Resolve a seeded system group by its stable key — 'CASH', 'ASSETS'.
      *
      * Returns null when the key is not seeded rather than throwing, because a

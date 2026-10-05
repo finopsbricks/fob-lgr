@@ -13,6 +13,7 @@ import {
   updateAccountHandler,
   setStatusHandler,
   deleteAccountHandler,
+  seedAccountsHandler,
 } from './write.js';
 
 const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'income', 'expense'];
@@ -105,6 +106,12 @@ export function buildAccountsCommand() {
       .description('Set an account back to active')
       .argument('<id>', 'Account ID'),
   ).action(safe(setStatusHandler('active')));
+
+  jsonOption(
+    accounts
+      .command('seed')
+      .description("Seed this org's system group accounts (idempotent; run once on a new org)"),
+  ).action(safe(seedAccountsHandler));
 
   accounts
     .command('delete')

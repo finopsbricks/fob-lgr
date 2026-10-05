@@ -106,3 +106,20 @@ export async function deleteAccountHandler(argv) {
   await lgr.accounts.delete(argv.id);
   console.log(`Deleted ${argv.id}.`);
 }
+
+export async function seedAccountsHandler(argv) {
+  const lgr = clientFor();
+
+  const result = await lgr.accounts.seed();
+
+  if (argv.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (result.created.length) {
+    console.log(`Seeded ${result.created.length} system groups: ${result.created.join(', ')}`);
+  } else {
+    console.log(`Nothing to seed — all ${result.existing.length} system groups already exist.`);
+  }
+}
