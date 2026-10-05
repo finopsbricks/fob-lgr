@@ -37,8 +37,8 @@ export function run(argv) {
     .version(packageVersion(), '-v, --version', 'Show version number')
     .option('--profile, --org <name>', 'Use a specific configured profile for this command')
     .hook('preAction', (thisCommand) => {
-      const { profile } = thisCommand.opts();
-      if (profile) setOrgOverride(profile);
+      const { org } = thisCommand.opts();
+      if (org) setOrgOverride(org);
     });
 
   program

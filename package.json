@@ -13,7 +13,7 @@
   },
   "files": [
     "bin",
-    "src",
+    "src/**/*.js",
     "README.md",
     "CHANGELOG.md"
   ],
@@ -21,7 +21,8 @@
     "start": "node bin/cli.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "typecheck": "tsc -p jsconfig.json",
-    "typecheck:watch": "tsc -p jsconfig.json --watch"
+    "typecheck:watch": "tsc -p jsconfig.json --watch",
+    "prepublishOnly": "git diff --quiet HEAD && test -z \"$(git status --porcelain)\" || (echo 'fob-lgr: commit or stash first; refusing to publish a dirty tree' && exit 1)"
   },
   "keywords": [
     "ledger",

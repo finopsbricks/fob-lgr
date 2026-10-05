@@ -71,6 +71,18 @@ function buildUrl(baseUrl, path, searchParams) {
   return url;
 }
 
+/**
+ * @typedef {object} RequestOptions
+ * @property {{ api_url?: string, api_key?: string, api_secret?: string }} [credentials]
+ * @property {Record<string, any>} [searchParams] query params; undefined/null/'' values are dropped
+ */
+
+/**
+ * @param {string} method
+ * @param {string} path
+ * @param {any} body
+ * @param {RequestOptions} [options]
+ */
 async function apiRequest(method, path, body, { credentials, searchParams } = {}) {
   const creds = resolveCreds(credentials);
   const url = buildUrl(creds.api_url, path, searchParams);
@@ -116,18 +128,22 @@ async function apiRequest(method, path, body, { credentials, searchParams } = {}
   return respBody;
 }
 
+/** @param {RequestOptions} [options] */
 export function apiGet(path, options) {
   return apiRequest('GET', path, undefined, options);
 }
 
+/** @param {RequestOptions} [options] */
 export function apiPost(path, body, options) {
   return apiRequest('POST', path, body ?? {}, options);
 }
 
+/** @param {RequestOptions} [options] */
 export function apiPatch(path, body, options) {
   return apiRequest('PATCH', path, body ?? {}, options);
 }
 
+/** @param {RequestOptions} [options] */
 export function apiDelete(path, options) {
   return apiRequest('DELETE', path, undefined, options);
 }
@@ -140,6 +156,9 @@ export function apiDelete(path, options) {
  * ledger query that quietly returned the first 15,000 of 40,000 entries would
  * produce a total that looks plausible and is wrong.
  *
+ * @param {string} path
+ * @param {RequestOptions} [options]
+ * @param {{ maxRows?: number, pageSize?: number }} [paging]
  * @returns {Promise<{ data: any[], page_context: object|null, truncated: boolean }>}
  */
 export async function apiGetAll(path, options = {}, { maxRows = MAX_ALL_ROWS, pageSize = 500 } = {}) {

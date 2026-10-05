@@ -32,7 +32,7 @@ export function safe(handler) {
     });
 
     // Global options live on the root command, not the leaf — merge them down
-    // so handlers reading argv.profile keep working. Leaf values win.
+    // so handlers reading argv.org (commander names `--profile, --org` by its last long flag) keep working. Leaf values win.
     let parent = cmd.parent;
     while (parent) {
       Object.assign(argv, parent.opts(), argv);
