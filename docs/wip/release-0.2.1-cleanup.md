@@ -1,6 +1,6 @@
 # fob-lgr 0.2.1 — packaging and type-check cleanup
 
-## Status: PLANNING (0%): written 2026-10-05, after 0.2.0 shipped with two stray screenshots and type errors surfaced in worker-chisel. Nothing done yet.
+## Status: IN PROGRESS (~60%): written 2026-10-05, after 0.2.0 shipped with two stray screenshots and type errors surfaced in worker-chisel. Phases 1–2 and the 0.2.1 commit are done. Next: alex moves the screenshots out of `src/`, publishes 0.2.1, then handles 0.2.0 per Decision 1. No git remote yet (Decision 2).
 
 fob-lgr 0.2.0 (published 2026-10-05 06:19 UTC, adds `accounts.seed()`) went out with problems that all trace back to one gap: nothing stops a publish from an unclean working tree, and nothing type-checks the package. This WIP fixes the four problems, adds the two guards that would have caught them, and releases 0.2.1.
 
@@ -47,19 +47,21 @@ Commit the existing working-tree edit (`opts().org`). Add a test: run the progra
 
 ## Implementation Phases
 
-### Phase 1: Guards ❌
-- [ ] `jsconfig.json` (from fob-zb); `npm run typecheck` runs and shows the two `http.js` errors
-- [ ] `files` narrowed to `src/**/*.js`; `prepublishOnly` refuses a dirty tree
+### Phase 1: Guards 🟡
+- [x] `jsconfig.json` (from fob-zb); `npm run typecheck` runs and shows the two `http.js` errors
+- [x] `files` narrowed to `src/**/*.js`; `prepublishOnly` refuses a dirty tree. Verified: `npm pack --dry-run` lists 25 files and no PNGs while the screenshots are still in `src/`; `npm run prepublishOnly` exits 1 on the current tree.
 - [ ] alex moves the two screenshots out of `src/`
 
-### Phase 2: Fixes ❌
-- [ ] `http.js` JSDoc; `npm run typecheck` clean
-- [ ] Commit the `opts().org` fix plus the flag test (`--profile` and `--org`)
-- [ ] `npm test` green
+### Phase 2: Fixes 🟡
+- [x] `http.js` JSDoc: a `RequestOptions` typedef used by `apiRequest`, `apiGet/Post/Patch/Delete` and `apiGetAll`; `npm run typecheck` clean
+- [x] Flag test `tests/cli-profile-flag.test.js` (`--profile`, `--org`, and no flag). Verified: it fails 2/3 against the 0.2.0 committed `opts().profile`. Also fixed the stale `argv.profile` comment in `src/cli/_helpers.js`.
+- [x] Commit the `opts().org` fix plus the test
+- [x] `npm test` green (18/18)
 
-### Phase 3: Release 0.2.1 ❌
-- [ ] `CHANGELOG.md`; version 0.2.1; commit
-- [ ] `npm pack --dry-run`: JS files and docs only, 25 or fewer files
+### Phase 3: Release 0.2.1 🟡
+- [x] `CHANGELOG.md` (0.2.1, 0.2.0, 0.1.0); version 0.2.1 in `package.json` and the lockfile
+- [x] Commit
+- [x] `npm pack --dry-run`: JS files plus README, CHANGELOG and package.json, 26 files (0.2.0's 27, minus the two PNGs, plus CHANGELOG)
 - [ ] `npm publish`; then deprecate or unpublish 0.2.0 per Decision 1
 - [ ] worker-chisel: `npm install @finopsbricks/fob-lgr@^0.2.1`; its `npm run typecheck` shows no fob-lgr errors; tests green
 
