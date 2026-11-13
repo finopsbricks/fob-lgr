@@ -13,6 +13,8 @@ import {
   postTransactionHandler,
   voidTransactionHandler,
   deleteTransactionHandler,
+  setTypeHandler,
+  deleteManyTransactionsHandler,
 } from './status.js';
 
 export function buildTransactionsCommand() {
@@ -79,12 +81,30 @@ export function buildTransactionsCommand() {
       .option('-y, --yes', 'Skip confirmation'),
   ).action(safe(voidTransactionHandler));
 
+  jsonOption(
+    transactions
+      .command('set-type')
+      .description("Change a transaction's business event type, in any status (it moves no balance)")
+      .argument('<id>', 'Transaction ID')
+      .argument('<type>', "Business event, e.g. 'vendor_paid'"),
+  ).action(safe(setTypeHandler));
+
   transactions
     .command('delete')
-    .description('Delete a draft. Posted transactions must be voided instead')
+    .description('Delete a draft, or any transaction while the org has hard delete on')
     .argument('<id>', 'Transaction ID')
     .option('-y, --yes', 'Skip confirmation')
     .action(safe(deleteTransactionHandler));
+
+  jsonOption(
+    transactions
+      .command('delete-many')
+      .description('Permanently delete every transaction from one source, while the org has hard delete on')
+      .requiredOption('--source <source>', "Origin system, e.g. 'tally'")
+      .option('--from <yyyy-mm-dd>', 'Accounting date from (inclusive)')
+      .option('--to <yyyy-mm-dd>', 'Accounting date to (inclusive)')
+      .option('-y, --yes', 'Skip confirmation'),
+  ).action(safe(deleteManyTransactionsHandler));
 
   return transactions;
 }

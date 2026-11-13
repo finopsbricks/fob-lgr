@@ -30,7 +30,10 @@ export function buildTransactions(ctx) {
      */
     create: (data) => ctx.post('/api/v1/transactions', data).then(unwrap),
 
-    /** Edit a draft. `entries` is replaced wholesale, not merged. */
+    /**
+     * Edit a draft. `entries` is replaced wholesale, not merged. `type` sent on
+     * its own is accepted in any status (see `setType`).
+     */
     update: (id, data) => ctx.patch(`/api/v1/transactions/${encodeURIComponent(id)}`, data).then(unwrap),
 
     /** Post a draft. The balance check runs here and refuses if it fails. */
@@ -42,7 +45,26 @@ export function buildTransactions(ctx) {
      */
     void: (id) => ctx.patch(`/api/v1/transactions/${encodeURIComponent(id)}`, { status: 'void' }).then(unwrap),
 
-    /** Delete a draft. Posted transactions are voided, never deleted. */
+    /**
+     * Change the business event type, in any status. The one field a posted
+     * transaction may change: it moves no balance.
+     */
+    setType: (id, type) => ctx.patch(`/api/v1/transactions/${encodeURIComponent(id)}`, { type }).then(unwrap),
+
+    /**
+     * Delete a transaction. A draft always; a posted or void one only while
+     * the org has Allow hard delete on, otherwise it is voided instead.
+     */
     delete: (id) => ctx.delete(`/api/v1/transactions/${encodeURIComponent(id)}`).then(unwrap),
+
+    /**
+     * Delete every transaction from one source (`{ source, date_from?, date_to? }`),
+     * only while the org has Allow hard delete on. Returns `{ matched, deleted, dry_run }`.
+     * It can't be undone: call `countForDelete` first to see what it would remove.
+     */
+    deleteMany: (filter) => ctx.delete('/api/v1/transactions', { searchParams: filter }).then(unwrap),
+
+    /** How many transactions `deleteMany(filter)` would delete, without deleting any. */
+    countForDelete: (filter) => ctx.delete('/api/v1/transactions', { searchParams: { ...filter, dry_run: true } }).then(unwrap),
   };
 }

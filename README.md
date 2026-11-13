@@ -104,6 +104,17 @@ A posted transaction is immutable. Correct one by voiding it and posting a
 replacement — that is what keeps the mirror reconcilable against the system it
 mirrors.
 
+Two exceptions:
+
+```bash
+fob-lgr transactions set-type <id> vendor_paid      # type moves no balance: any status
+fob-lgr transactions delete-many --source tally     # only while the org has Allow hard delete on
+```
+
+`delete-many` shows how many transactions it would delete and asks first. Use it
+to clear an import that turned out wrong before re-importing it; an org admin
+turns hard delete on in the ledger's settings.
+
 ## Errors
 
 Refusals carry the figures involved, not just a sentence:
@@ -162,7 +173,7 @@ try {
 | Namespace | Methods |
 |---|---|
 | `accounts` | `list`, `getAll`, `get`, `tree`, `create`, `update`, `delete`, `findSystem` |
-| `transactions` | `list`, `getAll`, `get`, `create`, `update`, `post`, `void`, `delete` |
+| `transactions` | `list`, `getAll`, `get`, `create`, `update`, `setType`, `post`, `void`, `delete`, `deleteMany`, `countForDelete` |
 | `entries` | `list`, `getAll`, `unallocated` |
 
 `entries` is read-only. An entry is written only as part of a transaction —

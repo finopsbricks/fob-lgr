@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-14
+
+### Added
+- `transactions.setType(id, type)` and `fob-lgr transactions set-type <id> <type>`: change a transaction's business event type in any status. Needs a ledger that accepts `type` alone on posted transactions.
+- `transactions.deleteMany(filter)`, `transactions.countForDelete(filter)` and `fob-lgr transactions delete-many --source <s> [--from] [--to]`: delete every transaction from one source while the org has Allow hard delete on. The CLI shows the count and asks before deleting.
+
+### Changed
+- `transactions.delete` and `fob-lgr transactions delete` also delete posted and void transactions while the org has hard delete on.
+
 ## [0.2.1] - 2026-10-05
 
 ### Fixed

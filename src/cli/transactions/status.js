@@ -58,7 +58,7 @@ export async function deleteTransactionHandler(argv) {
   if (!argv.yes) {
     const { confirm } = await import('@inquirer/prompts');
     const ok = await confirm({
-      message: `Delete draft ${argv.id}? This removes it entirely — void instead if it was ever posted.`,
+      message: `Delete ${argv.id}? This removes it entirely. A posted or void one can only be deleted while the org has hard delete on.`,
       default: false,
     });
 
@@ -70,4 +70,50 @@ export async function deleteTransactionHandler(argv) {
 
   await lgr.transactions.delete(argv.id);
   console.log(`Deleted ${argv.id}.`);
+}
+
+export async function setTypeHandler(argv) {
+  const lgr = clientFor();
+  const transaction = await lgr.transactions.setType(argv.id, argv.type);
+
+  if (argv.json) {
+    console.log(JSON.stringify(transaction, null, 2));
+    return;
+  }
+
+  console.log(`${transaction.id} is now '${transaction.type}'.`);
+}
+
+export async function deleteManyTransactionsHandler(argv) {
+  const lgr = clientFor();
+  const filter = { source: argv.source, date_from: argv.from, date_to: argv.to };
+  const range = argv.from || argv.to ? ` dated ${argv.from || '…'} to ${argv.to || '…'}` : '';
+
+  const { matched } = await lgr.transactions.countForDelete(filter);
+  if (!matched) {
+    console.log(`No transactions from '${argv.source}'${range}.`);
+    return;
+  }
+
+  if (!argv.yes) {
+    const { confirm } = await import('@inquirer/prompts');
+    const ok = await confirm({
+      message: `Permanently delete ${matched} transactions from '${argv.source}'${range}? This can't be undone.`,
+      default: false,
+    });
+
+    if (!ok) {
+      console.log('Cancelled.');
+      return;
+    }
+  }
+
+  const result = await lgr.transactions.deleteMany(filter);
+
+  if (argv.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  console.log(`Deleted ${result.deleted} transactions from '${argv.source}'${range}.`);
 }
