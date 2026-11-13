@@ -50,5 +50,11 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/finopsbricks/fob-lgr.git"
+  },
+  "homepage": "https://github.com/finopsbricks/fob-lgr#readme",
+  "bugs": "https://github.com/finopsbricks/fob-lgr/issues"
 }
