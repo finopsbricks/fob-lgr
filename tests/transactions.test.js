@@ -29,3 +29,12 @@ describe('transactions resource', () => {
     expect(calls).toEqual([['delete', '/api/v1/transactions', { searchParams: { source: 'tally', dry_run: true } }]]);
   });
 });
+
+describe('reports resource', () => {
+  it('asks for the trial balance as at a date', async () => {
+    const { buildReports } = await import('../src/resources/reports.js');
+    const { calls, ctx } = stubCtx();
+    await buildReports(ctx).trialBalance({ as_of: '2026-11-13' });
+    expect(calls).toEqual([['get', '/api/v1/reports/trial-balance', { searchParams: { as_of: '2026-11-13' } }]]);
+  });
+});

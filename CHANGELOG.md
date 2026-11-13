@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-14
+
+### Added
+- `reports.trialBalance({ as_of })` and `fob-lgr reports trial-balance --as-of <date>`: every account's balance as at a date in one request, each row with its `source` and `source_ref`. Needs a ledger with `GET /api/v1/reports/trial-balance`.
+
 ## [0.3.0] - 2026-11-14
 
 ### Added

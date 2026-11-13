@@ -21,6 +21,7 @@ import { buildConfigCommand } from './config/index.js';
 import { buildAccountsCommand } from './accounts/index.js';
 import { buildTransactionsCommand } from './transactions/index.js';
 import { buildEntriesCommand } from './entries/index.js';
+import { buildReportsCommand } from './reports/index.js';
 
 function packageVersion() {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -51,6 +52,7 @@ export function run(argv) {
     .addCommand(buildAccountsCommand())
     .addCommand(buildTransactionsCommand())
     .addCommand(buildEntriesCommand())
+    .addCommand(buildReportsCommand())
     .allowUnknownOption(false)
     .showHelpAfterError();
 

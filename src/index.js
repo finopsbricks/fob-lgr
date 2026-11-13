@@ -27,6 +27,7 @@ import { createTransport } from './http.js';
 import { buildAccounts } from './resources/accounts.js';
 import { buildTransactions } from './resources/transactions.js';
 import { buildEntries } from './resources/entries.js';
+import { buildReports } from './resources/reports.js';
 
 export { ApiError, DEFAULT_API_URL, MAX_ALL_ROWS } from './http.js';
 
@@ -42,6 +43,7 @@ export function fobLgr(credentials) {
     accounts: buildAccounts(ctx),
     transactions: buildTransactions(ctx),
     entries: buildEntries(ctx),
+    reports: buildReports(ctx),
   };
 }
 

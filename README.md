@@ -115,6 +115,16 @@ fob-lgr transactions delete-many --source tally     # only while the org has All
 to clear an import that turned out wrong before re-importing it; an org admin
 turns hard delete on in the ledger's settings.
 
+### Trial balance
+
+```bash
+fob-lgr reports trial-balance --as-of 2026-11-13
+fob-lgr reports trial-balance --as-of 2026-11-13 --format json   # rows carry source and source_ref
+```
+
+Every account's balance as at a date, posted transactions only, on the side it
+falls. Use it to check an import against its source without summing entries.
+
 ## Errors
 
 Refusals carry the figures involved, not just a sentence:
@@ -175,6 +185,7 @@ try {
 | `accounts` | `list`, `getAll`, `get`, `tree`, `create`, `update`, `delete`, `findSystem` |
 | `transactions` | `list`, `getAll`, `get`, `create`, `update`, `setType`, `post`, `void`, `delete`, `deleteMany`, `countForDelete` |
 | `entries` | `list`, `getAll`, `unallocated` |
+| `reports` | `trialBalance` |
 
 `entries` is read-only. An entry is written only as part of a transaction —
 one writable on its own could leave a transaction unbalanced.
