@@ -2,6 +2,7 @@
 
 ## Status: IN PROGRESS (~60%): written 2026-10-05, after 0.2.0 shipped with two stray screenshots and type errors surfaced in worker-chisel. Phases 1–2 and the 0.2.1 commit are done. Next: alex moves the screenshots out of `src/`, publishes 0.2.1, then handles 0.2.0 per Decision 1. No git remote yet (Decision 2).
 ## Priority: P4: the fixes shipped in 0.3.0, the screenshots are gone and the remote exists; only deprecating 0.2.0 is left
+## Bet: first-class-cli
 
 fob-lgr 0.2.0 (published 2026-10-05 06:19 UTC, adds `accounts.seed()`) went out with problems that all trace back to one gap: nothing stops a publish from an unclean working tree, and nothing type-checks the package. This WIP fixes the four problems, adds the two guards that would have caught them, and releases 0.2.1.
 
