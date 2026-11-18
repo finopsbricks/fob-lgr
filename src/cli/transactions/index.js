@@ -5,10 +5,12 @@
 import { Command, Option } from 'commander';
 
 import { safe, listOptions, jsonOption } from '../_helpers.js';
+import { MAX_BATCH_SIZE, DEFAULT_BATCH_SIZE, DEFAULT_CONCURRENCY } from '../../resources/createMany.js';
 import { collectEntry } from './_entries.js';
 import { listTransactionsHandler } from './list.js';
 import { showTransactionHandler } from './show.js';
 import { createTransactionHandler } from './create.js';
+import { pushTransactionsHandler } from './push.js';
 import {
   postTransactionHandler,
   voidTransactionHandler,
@@ -65,6 +67,20 @@ export function buildTransactionsCommand() {
       .option('--details <file>', 'JSON file holding the upstream event as it arrived')
       .option('--draft', 'Create as an unbalanced-allowed draft rather than posting'),
   ).action(safe(createTransactionHandler));
+
+  jsonOption(
+    transactions
+      .command('push')
+      .description('Load a file of transactions, many per request. Amounts are integers in minor units')
+      .requiredOption('--file <path>', "NDJSON, one transaction per line; '-' reads stdin")
+      .option('--concurrency <n>', 'Requests in flight', Number, DEFAULT_CONCURRENCY)
+      .option('--batch-size <n>', `Transactions per request (max ${MAX_BATCH_SIZE})`, Number, DEFAULT_BATCH_SIZE)
+      .option('--draft', 'Load as drafts rather than posting')
+      .option('--dry-run', 'Check every row against the ledger and report; write nothing')
+      .option('--continue-on-error', 'Keep going past a failed row (the default)')
+      .option('--no-continue-on-error', 'Send no further batches once a row has failed')
+      .option('--failed-out <path>', 'Write the rows that failed, as NDJSON you can push again'),
+  ).action(safe(pushTransactionsHandler));
 
   jsonOption(
     transactions
