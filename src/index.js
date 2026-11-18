@@ -30,6 +30,7 @@ import { buildEntries } from './resources/entries.js';
 import { buildReports } from './resources/reports.js';
 
 export { ApiError, DEFAULT_API_URL, MAX_ALL_ROWS } from './http.js';
+export { MAX_BATCH_SIZE, DEFAULT_BATCH_SIZE, DEFAULT_CONCURRENCY } from './resources/createMany.js';
 
 /**
  * Build a ledger client with credentials bound.

@@ -8,6 +8,8 @@
  * money between what a caller meant and what the ledger stored.
  */
 
+import { createMany } from './createMany.js';
+
 const unwrap = (r) => r?.data ?? null;
 
 export function buildTransactions(ctx) {
@@ -29,6 +31,26 @@ export function buildTransactions(ctx) {
      * duplicating it. That is what makes an interrupted sync safe to re-run.
      */
     create: (data) => ctx.post('/api/v1/transactions', data).then(unwrap),
+
+    /**
+     * Create many transactions, reporting on each one.
+     *
+     * Chunks to the bulk endpoint's maximum and keeps `concurrency` batches in
+     * flight. The caller never writes the pool — that is the whole reason this
+     * exists, because every caller that had to write one wrote it differently.
+     *
+     * Returns `{ results, summary, failed }`: a result per input item in input
+     * order, the counts, and the items to re-push with their reasons. A refused
+     * transaction is a result, not a thrown error; only a refused *request* —
+     * bad credentials, an unreachable host — throws.
+     *
+     * `items` may be any iterable, so an NDJSON file streams through rather
+     * than being held parsed in memory.
+     *
+     * @param {Iterable<any>|AsyncIterable<any>} items
+     * @param {import('./createMany.js').CreateManyOptions} [options]
+     */
+    createMany: (items, options) => createMany(ctx, items, options),
 
     /**
      * Edit a draft. `entries` is replaced wholesale, not merged. `type` sent on
