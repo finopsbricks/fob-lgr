@@ -74,6 +74,66 @@ payment can be split across two branches while the bank line belongs to neither.
 For generated payloads, `--entries-json <file>` takes the array directly, and
 `-` reads stdin.
 
+### Loading a file
+
+`create` makes one transaction per invocation, which is about 1.7 a second —
+nearly all of it Node starting up. For anything bigger than a handful, `push`
+takes a file:
+
+```bash
+fob-lgr transactions push --file august.ndjson
+```
+
+NDJSON: one transaction per line, each line the same object `create` builds.
+`-` reads stdin. Measured against the live ledger, 500 transactions in 2.4
+seconds.
+
+```jsonc
+{"date":"2026-08-05","source":"sap","source_ref":"4900001234","narration":"Rent — Aug","entries":[{"account_ref":"400100","debit":5000000},{"account_ref":"113100","credit":5000000}]}
+```
+
+`account_ref` is the account's own `source_ref`, resolved by the ledger. A file
+produced from SAP knows accounts by their SAKNR and never by an id this ledger
+generated, so there is nothing to pre-fetch and join. Add `account_source` when
+two upstream systems both use the number.
+
+| Option | |
+|---|---|
+| `--file <path>` | NDJSON, one transaction per line; `-` reads stdin |
+| `--concurrency <n>` | Requests in flight (default 4) |
+| `--batch-size <n>` | Transactions per request (default 100, max 500) |
+| `--draft` | Load as drafts rather than posting |
+| `--dry-run` | Check every row against the ledger and report; write nothing |
+| `--no-continue-on-error` | Send no further batches once a row has failed |
+| `--failed-out <path>` | Write the rows that failed, as NDJSON you can push again |
+| `--json` | Per-item results as raw JSON |
+
+**One bad row costs you that row.** It is reported with the line of the file it
+came from, the other 499 are written, and the exit code is non-zero:
+
+```
+Pushed 500 transactions in 2.4s (206.0/s)
+
+  created:         499
+  existing:          0
+  failed:            1
+
+line  source_ref             code               why
+----------------------------------------------------------------------------------
+ 151  4900001384             ACCOUNT_NOT_FOUND  Entry 0: no account with source_ref…
+```
+
+`--failed-out` writes exactly those rows back out. Fix them and push that file —
+it is the input format, so nothing has to be assembled by hand.
+
+Re-pushing is always safe. `(source, source_ref)` is the identity, so a second
+run of the same file creates nothing and reports every row as `existing`. That
+is what makes "run it again" the way to recover from a load that stopped
+halfway.
+
+Progress goes to stderr and results to stdout, so `--json | jq` stays clean
+while you still see movement.
+
 ### Reading
 
 ```bash
@@ -183,7 +243,7 @@ try {
 | Namespace | Methods |
 |---|---|
 | `accounts` | `list`, `getAll`, `get`, `tree`, `create`, `update`, `delete`, `findSystem` |
-| `transactions` | `list`, `getAll`, `get`, `create`, `update`, `setType`, `post`, `void`, `delete`, `deleteMany`, `countForDelete` |
+| `transactions` | `list`, `getAll`, `get`, `create`, `createMany`, `update`, `setType`, `post`, `void`, `delete`, `deleteMany`, `countForDelete` |
 | `entries` | `list`, `getAll`, `unallocated` |
 | `reports` | `trialBalance` |
 
@@ -199,6 +259,27 @@ re-running an interrupted sync updates rather than duplicating:
 await lgr.transactions.create({ source: 'sap', source_ref: '4900001234', … });
 // created: false on a re-send — nothing was written
 ```
+
+For more than a handful, `createMany` chunks to the bulk endpoint and keeps
+several batches in flight. **Do not write the pool** — that is what this is:
+
+```js
+const { results, summary, failed } = await lgr.transactions.createMany(rows, {
+  concurrency: 4,
+  batch_size: 100,
+  onProgress: ({ done, created, failed }) => process.stderr.write(`\r${done} · ${created} created · ${failed} failed`),
+});
+```
+
+`rows` may be any iterable, so an NDJSON stream goes straight in. A refused
+transaction comes back as a result — `created`, `existing` or `failed` with the
+ledger's own code and figures — in input order, whatever order the batches
+finished in. Only a refused *request* throws: bad credentials, a batch over the
+limit. `failed` carries the items themselves, ready to be pushed again.
+
+An entry may name its account by `account_ref` (the account's `source_ref`)
+instead of by id, so a file from an upstream system needs no join against the
+chart first.
 
 ### Mirroring two systems at once
 

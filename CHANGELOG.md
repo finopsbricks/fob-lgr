@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-18
+
+### Added
+- `fob-lgr transactions push --file <ndjson>`: load a file of transactions in one command. One transaction per line, `-` reads stdin. `--concurrency`, `--batch-size`, `--draft`, `--dry-run`, `--no-continue-on-error`, `--failed-out <path>`, `--json`. Measured against the live ledger: 500 transactions in 2.4s (206/sec), against 1.7/sec for `transactions create` one at a time.
+- `transactions.createMany(items, { concurrency, batch_size, dry_run, onProgress })`: chunks to the bulk endpoint, keeps several batches in flight, and returns a result per item in input order. `items` may be any iterable, so an NDJSON file streams rather than being parsed whole. A refused transaction is a result; only a refused request throws. Needs a ledger with `POST /api/v1/transactions/bulk` — against an older one it falls back to one request per transaction, so the caller still never writes a pool.
+- Entries may name their account by `account_ref` (the account's `source_ref`) instead of by the generated id, resolved by the ledger. Removes the chart pre-fetch every importer was writing. `account_source` disambiguates when two upstream systems use the same number.
+
+### Notes
+- Partial success is a result, not an error: `push` exits non-zero when any row failed, having kept the rows that succeeded and written the failures to `--failed-out` as a file you can fix and push again.
+
 ## [0.4.0] - 2026-11-14
 
 ### Added
